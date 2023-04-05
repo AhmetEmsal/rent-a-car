@@ -13,11 +13,11 @@ public interface MaintenanceService {
 
     List<GetAllMaintenanceResponse> getAll();
 
-    CreateMaintenanceResponse add(CreateMaintenanceRequest request);
+    CreateMaintenanceResponse add(CreateMaintenanceRequest request) throws Exception;
 
-    UpdateMaintenanceResponse update(int id, UpdateMaintenanceRequest request);
+    UpdateMaintenanceResponse update(int id, UpdateMaintenanceRequest request) throws Exception;
 
-    GetMaintenanceResponse getById(int id);
+    GetMaintenanceResponse getById(int id) throws Exception;
 
-    void delete(int id);
+    void delete(int id) throws Exception;
 }

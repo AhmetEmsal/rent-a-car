@@ -25,7 +25,7 @@ public class BrandsController {
     }
 
     @GetMapping("/{id}")
-    public GetBrandResponse getById(@PathVariable int id) {
+    public GetBrandResponse getById(@PathVariable int id) throws Exception {
         return service.getById(id);
     }
 
@@ -36,13 +36,13 @@ public class BrandsController {
     }
 
     @PutMapping("/{id}")
-    public UpdateBrandResponse update(@PathVariable int id, @RequestBody UpdateBrandRequest request) {
+    public UpdateBrandResponse update(@PathVariable int id, @RequestBody UpdateBrandRequest request) throws Exception {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable int id) {
+    public void delete(@PathVariable int id) throws Exception {
         service.delete(id);
     }
 }

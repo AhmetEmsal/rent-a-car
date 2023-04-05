@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,6 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class CreateMaintenanceRequest {
     private int carId;
-    private Date dueDate;
+    private String information;
+    private LocalDateTime dueDate;
 
 }

@@ -15,11 +15,11 @@ public interface BrandService {
 
     CreateBrandResponse add(CreateBrandRequest request);
 
-    UpdateBrandResponse update(int id, UpdateBrandRequest request);
+    UpdateBrandResponse update(int id, UpdateBrandRequest request) throws Exception;
 
-    GetBrandResponse getById(int id);
+    GetBrandResponse getById(int id) throws Exception;
 
-    void delete(int id);
+    void delete(int id) throws Exception;
 
 
 }

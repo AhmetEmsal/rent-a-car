@@ -2,9 +2,12 @@ package kodlama.io.rentacar.entities;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,10 +19,14 @@ public class Maintenance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    private String information;
+    private boolean isCompleted;
     @ManyToOne
+    @JoinColumn(name = "car_id")
     private Car car;
-    private Date dueDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     @Nullable
-    private Date updateAt;
-    private Date createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 }

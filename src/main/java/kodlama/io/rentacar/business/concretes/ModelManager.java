@@ -14,19 +14,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
 public class ModelManager implements ModelService {
-    private final ModelRepository modelRepository;
+    private final ModelRepository repository;
     private ModelMapper modelMapper;
 
     @Override
     public List<GetAllModelsResponse> getAll() {
-
-        List<Model> models = modelRepository.findAll();
-
-        return models
+        return repository.findAll()
                 .stream()
                 .map(model -> modelMapper.map(model, GetAllModelsResponse.class))
                 .toList();
@@ -36,26 +34,40 @@ public class ModelManager implements ModelService {
     public CreateModelResponse add(CreateModelRequest request) {
         Model model = modelMapper.map(request, Model.class);
         model.setId(0);
-        modelRepository.save(model);
+        repository.save(model);
         return modelMapper.map(model, CreateModelResponse.class);
     }
 
     @Override
-    public UpdateModelResponse update(int id, UpdateModelRequest request) {
+    public UpdateModelResponse update(int id, UpdateModelRequest request) throws Exception {
+        throwErrorIfNotExists(id);
         Model model = modelMapper.map(request, Model.class);
         model.setId(id);
-        modelRepository.save(model);
+        repository.save(model);
         return modelMapper.map(model, UpdateModelResponse.class);
     }
 
     @Override
-    public GetModelResponse getById(int id) {
-        Model model = modelRepository.findById(id).orElseThrow();
-        return modelMapper.map(model, GetModelResponse.class);
+    public GetModelResponse getById(int id) throws Exception {
+        Optional<Model> model = repository.findById(id);
+        if(model.isEmpty()) throwErrorAboutNotExists(id);
+
+        return modelMapper.map(model.get(), GetModelResponse.class);
     }
 
     @Override
-    public void delete(int id) {
-        modelRepository.deleteById(id);
+    public void delete(int id) throws Exception {
+        throwErrorIfNotExists(id);
+        repository.deleteById(id);
+    }
+
+    private void throwErrorIfNotExists(int id){
+        if(repository.existsById(id)) return;
+        throwErrorAboutNotExists(id);
+    }
+
+    private void throwErrorAboutNotExists(int id){
+        throw new RuntimeException("Model("+id+") not found!");
+
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/maintenance")
+@RequestMapping("/api/maintenances")
 public class MaintenanceController {
     private final MaintenanceService service;
 
@@ -25,24 +25,24 @@ public class MaintenanceController {
     }
 
     @GetMapping("/{id}")
-    public GetMaintenanceResponse getById(@PathVariable int id){
+    public GetMaintenanceResponse getById(@PathVariable int id) throws Exception {
         return service.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateMaintenanceResponse add(@RequestBody CreateMaintenanceRequest request){
+    public CreateMaintenanceResponse add(@RequestBody CreateMaintenanceRequest request) throws Exception {
         return service.add(request);
     }
 
     @PutMapping("/{id}")
-    public UpdateMaintenanceResponse update(@PathVariable int id, @RequestBody UpdateMaintenanceRequest request){
+    public UpdateMaintenanceResponse update(@PathVariable int id, @RequestBody UpdateMaintenanceRequest request) throws Exception {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable int id){
+    public void delete(@PathVariable int id) throws Exception {
         service.delete(id);
     }
 }

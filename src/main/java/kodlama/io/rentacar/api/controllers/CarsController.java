@@ -20,12 +20,12 @@ public class CarsController {
     private final CarService service;
 
     @GetMapping
-    public List<GetAllCarsResponse> getAll(@RequestParam(name="without-in-maintanance", required = false, defaultValue = "0") String withoutInMaintanance) {
-        return service.getAll(new GetAllCarsRequest(withoutInMaintanance.equals("1")));
+    public List<GetAllCarsResponse> getAll(@RequestParam(name="includeMaintenance", required = false, defaultValue = "true") boolean includeMaintenance) {
+        return service.getAll(new GetAllCarsRequest(includeMaintenance));
     }
 
     @GetMapping("/{id}")
-    public GetCarResponse getById(@PathVariable int id) {
+    public GetCarResponse getById(@PathVariable int id) throws Exception {
         return service.getById(id);
     }
 
@@ -36,13 +36,13 @@ public class CarsController {
     }
 
     @PutMapping("/{id}")
-    public UpdateCarResponse update(@PathVariable int id, @RequestBody UpdateCarRequest request) {
+    public UpdateCarResponse update(@PathVariable int id, @RequestBody UpdateCarRequest request) throws Exception {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable int id) {
+    public void delete(@PathVariable int id) throws Exception {
         service.delete(id);
     }
 

@@ -25,7 +25,7 @@ public class ModelsController {
     }
 
     @GetMapping("/{id}")
-    public GetModelResponse getById(@PathVariable int id) {
+    public GetModelResponse getById(@PathVariable int id) throws Exception {
         return service.getById(id);
     }
 
@@ -36,13 +36,13 @@ public class ModelsController {
     }
 
     @PutMapping("/{id}")
-    public UpdateModelResponse update(@PathVariable int id, @RequestBody UpdateModelRequest request) {
+    public UpdateModelResponse update(@PathVariable int id, @RequestBody UpdateModelRequest request) throws Exception {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable int id) {
+    public void delete(@PathVariable int id) throws Exception {
         service.delete(id);
     }
 }

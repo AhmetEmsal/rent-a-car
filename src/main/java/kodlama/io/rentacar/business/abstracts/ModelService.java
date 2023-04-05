@@ -14,9 +14,9 @@ public interface ModelService {
 
     CreateModelResponse add(CreateModelRequest request);
 
-    UpdateModelResponse update(int id, UpdateModelRequest request);
+    UpdateModelResponse update(int id, UpdateModelRequest request) throws Exception;
 
-    GetModelResponse getById(int id);
+    GetModelResponse getById(int id) throws Exception;
 
-    void delete(int id);
+    void delete(int id) throws Exception;
 }

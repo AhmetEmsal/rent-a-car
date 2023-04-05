@@ -10,5 +10,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GetAllCarsRequest {
-    private boolean withoutInMaintanance;
+    private boolean includeMaintenance;
 }

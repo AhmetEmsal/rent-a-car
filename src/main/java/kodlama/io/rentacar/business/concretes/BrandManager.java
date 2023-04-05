@@ -14,17 +14,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class BrandManager implements BrandService {
-    private final BrandRepository brandRepository;
+    private final BrandRepository repository;
     private final ModelMapper modelMapper;
 
     @Override
     public List<GetAllBrandsResponse> getAll() {
-        List<Brand> brands = brandRepository.findAll();
-        return brands
+        return repository.findAll()
                 .stream()
                 .map(brand -> modelMapper.map(brand, GetAllBrandsResponse.class))
                 .toList();
@@ -34,26 +34,41 @@ public class BrandManager implements BrandService {
     public CreateBrandResponse add(CreateBrandRequest request) {
         Brand brand = modelMapper.map(request, Brand.class);
         brand.setId(0);
-        Brand createdBrand = brandRepository.save(brand);
+        Brand createdBrand = repository.save(brand);
         return modelMapper.map(createdBrand, CreateBrandResponse.class);
     }
 
     @Override
-    public UpdateBrandResponse update(int id, UpdateBrandRequest request) {
+    public UpdateBrandResponse update(int id, UpdateBrandRequest request) throws Exception {
+        throwErrorIfNotExists(id);
         Brand brand = modelMapper.map(request,Brand.class);
         brand.setId(id);
-        brandRepository.save(brand);
+        repository.save(brand);
         return modelMapper.map(brand,UpdateBrandResponse.class);
     }
 
     @Override
-    public GetBrandResponse getById(int id) {
-        Brand brand = brandRepository.findById(id).orElseThrow();
-        return modelMapper.map(brand, GetBrandResponse.class);
+    public GetBrandResponse getById(int id) throws Exception {
+        Optional<Brand> brand = repository.findById(id);
+        if(brand.isEmpty()) throwErrorAboutNotExists(id);
+
+        return modelMapper.map(brand.get(), GetBrandResponse.class);
     }
 
     @Override
-    public void delete(int id) {
-        brandRepository.deleteById(id);
+    public void delete(int id) throws Exception{
+        throwErrorIfNotExists(id);
+        repository.deleteById(id);
+    }
+
+
+    private void throwErrorIfNotExists(int id){
+        if(repository.existsById(id)) return;
+        throwErrorAboutNotExists(id);
+    }
+
+    private void throwErrorAboutNotExists(int id){
+        throw new RuntimeException("Brand("+id+") not found!");
+
     }
 }
