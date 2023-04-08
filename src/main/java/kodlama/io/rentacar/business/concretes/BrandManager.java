@@ -40,7 +40,7 @@ public class BrandManager implements BrandService {
 
     @Override
     public UpdateBrandResponse update(int id, UpdateBrandRequest request) throws Exception {
-        throwErrorIfNotExists(id);
+        throwErrorIfBrandNotExist(id);
         Brand brand = modelMapper.map(request,Brand.class);
         brand.setId(id);
         repository.save(brand);
@@ -50,24 +50,24 @@ public class BrandManager implements BrandService {
     @Override
     public GetBrandResponse getById(int id) throws Exception {
         Optional<Brand> brand = repository.findById(id);
-        if(brand.isEmpty()) throwErrorAboutNotExists(id);
+        if(brand.isEmpty()) throwErrorAboutBrandNotExist(id);
 
         return modelMapper.map(brand.get(), GetBrandResponse.class);
     }
 
     @Override
     public void delete(int id) throws Exception{
-        throwErrorIfNotExists(id);
+        throwErrorIfBrandNotExist(id);
         repository.deleteById(id);
     }
 
 
-    private void throwErrorIfNotExists(int id){
+    private void throwErrorIfBrandNotExist(int id){
         if(repository.existsById(id)) return;
-        throwErrorAboutNotExists(id);
+        throwErrorAboutBrandNotExist(id);
     }
 
-    private void throwErrorAboutNotExists(int id){
+    private void throwErrorAboutBrandNotExist(int id){
         throw new RuntimeException("Brand("+id+") not found!");
 
     }

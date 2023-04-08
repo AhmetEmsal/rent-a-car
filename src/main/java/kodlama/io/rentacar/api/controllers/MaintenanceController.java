@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@AllArgsConstructor
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/maintenances")
 public class MaintenanceController {
     private final MaintenanceService service;
@@ -33,6 +33,11 @@ public class MaintenanceController {
     @ResponseStatus(HttpStatus.CREATED)
     public CreateMaintenanceResponse add(@RequestBody CreateMaintenanceRequest request) throws Exception {
         return service.add(request);
+    }
+
+    @PutMapping("/return")
+    public GetMaintenanceResponse returnCarFromMaintenance(@RequestParam int carId){
+        return service.returnCarFromMaintenance(carId);
     }
 
     @PutMapping("/{id}")

@@ -16,11 +16,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@AllArgsConstructor
 @Service
+@AllArgsConstructor
 public class ModelManager implements ModelService {
     private final ModelRepository repository;
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<GetAllModelsResponse> getAll() {
@@ -40,7 +40,7 @@ public class ModelManager implements ModelService {
 
     @Override
     public UpdateModelResponse update(int id, UpdateModelRequest request) throws Exception {
-        throwErrorIfNotExists(id);
+        throwErrorIfModelNotExist(id);
         Model model = modelMapper.map(request, Model.class);
         model.setId(id);
         repository.save(model);
@@ -50,23 +50,23 @@ public class ModelManager implements ModelService {
     @Override
     public GetModelResponse getById(int id) throws Exception {
         Optional<Model> model = repository.findById(id);
-        if(model.isEmpty()) throwErrorAboutNotExists(id);
+        if(model.isEmpty()) throwErrorAboutModelNotExist(id);
 
         return modelMapper.map(model.get(), GetModelResponse.class);
     }
 
     @Override
     public void delete(int id) throws Exception {
-        throwErrorIfNotExists(id);
+        throwErrorIfModelNotExist(id);
         repository.deleteById(id);
     }
 
-    private void throwErrorIfNotExists(int id){
+    private void throwErrorIfModelNotExist(int id){
         if(repository.existsById(id)) return;
-        throwErrorAboutNotExists(id);
+        throwErrorAboutModelNotExist(id);
     }
 
-    private void throwErrorAboutNotExists(int id){
+    private void throwErrorAboutModelNotExist(int id){
         throw new RuntimeException("Model("+id+") not found!");
 
     }

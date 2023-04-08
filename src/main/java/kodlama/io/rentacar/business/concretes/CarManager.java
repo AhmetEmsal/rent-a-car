@@ -18,11 +18,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@AllArgsConstructor
 @Service
+@AllArgsConstructor
 public class CarManager implements CarService {
     private final CarRepository repository;
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<GetAllCarsResponse> getAll(GetAllCarsRequest request) {
@@ -46,7 +46,7 @@ public class CarManager implements CarService {
 
     @Override
     public UpdateCarResponse update(int id, UpdateCarRequest request) throws Exception{
-        throwErrorIfNotExists(id);
+        throwErrorIfCarNotExist(id);
         Car car = modelMapper.map(request, Car.class);
         car.setId(id);
         Car updatedCar = repository.save(car);
@@ -56,14 +56,14 @@ public class CarManager implements CarService {
     @Override
     public GetCarResponse getById(int id) throws Exception{
         Optional<Car> car = repository.findById(id);
-        if(car.isEmpty()) throwErrorAboutNotExists(id);
+        if(car.isEmpty()) throwErrorAboutCarNotExist(id);
 
         return modelMapper.map(car.get(), GetCarResponse.class);
     }
 
     @Override
     public void delete(int id) throws Exception{
-        throwErrorIfNotExists(id);
+        throwErrorIfCarNotExist(id);
 
         repository.deleteById(id);
     }
@@ -71,7 +71,7 @@ public class CarManager implements CarService {
     @Override
     public void changeState(int carId, State state) throws Exception {
         Optional<Car> optionalCar = repository.findById(carId);
-        if(optionalCar.isEmpty()) throwErrorAboutNotExists(carId);
+        if(optionalCar.isEmpty()) throwErrorAboutCarNotExist(carId);
 
         Car car = optionalCar.get();
         car.setState(state);
@@ -79,12 +79,12 @@ public class CarManager implements CarService {
     }
 
 
-    private void throwErrorIfNotExists(int id){
+    private void throwErrorIfCarNotExist(int id){
         if(repository.existsById(id)) return;
-        throwErrorAboutNotExists(id);
+        throwErrorAboutCarNotExist(id);
     }
 
-    private void throwErrorAboutNotExists(int id){
+    private void throwErrorAboutCarNotExist(int id){
         throw new RuntimeException("Car("+id+") not found!");
 
     }
