@@ -21,5 +21,5 @@ public interface MaintenanceService {
 
     void delete(int id) throws Exception;
 
-    GetMaintenanceResponse returnCarFromMaintenance(int carId);
+    UpdateMaintenanceResponse returnCarFromMaintenance(int carId) throws Exception;
 }

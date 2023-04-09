@@ -131,8 +131,22 @@ public class RentalManager implements RentalService {
     }
 
     @Override
-    public GetRentalResponse returnCarFromRental(int carId) {
-        return null;
+    public UpdateRentalResponse returnCarFromRental(int carId) throws Exception {
+        throwErrorIfCarIsNotRented(carId);
+
+        Rental rental = repository.findRentalByCarIdAndRentedIsContinue(carId);
+        //rental.setCompleted(true);
+
+        carService.changeState(carId, State.AVAILABLE);
+
+
+        Rental savedRental = repository.save(rental);
+        return modelMapper.map(savedRental, UpdateRentalResponse.class);
+    }
+
+    private void throwErrorIfCarIsNotRented(int carId) {
+        if(repository.existsByCarIdAndRentalIsContinue(carId)) return;
+        throw new RuntimeException("No car("+carId+") is rented found !");
     }
 
 

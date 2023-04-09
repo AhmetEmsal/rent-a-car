@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/maintenances")
-public class MaintenanceController {
+public class MaintenancesController {
     private final MaintenanceService service;
 
     @GetMapping
@@ -36,7 +36,7 @@ public class MaintenanceController {
     }
 
     @PutMapping("/return")
-    public GetMaintenanceResponse returnCarFromMaintenance(@RequestParam int carId){
+    public UpdateMaintenanceResponse returnCarFromMaintenance(@RequestParam(name="car-id", required = true) int carId) throws Exception {
         return service.returnCarFromMaintenance(carId);
     }
 

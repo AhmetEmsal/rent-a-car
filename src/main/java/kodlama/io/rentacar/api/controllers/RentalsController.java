@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/rentals")
-public class RentalController {
+public class RentalsController {
     private final RentalService service;
 
     @GetMapping
@@ -36,6 +36,11 @@ public class RentalController {
     @PutMapping("/{id}")
     public UpdateRentalResponse update(@PathVariable int id, @RequestBody UpdateRentalRequest request) throws Exception{
         return service.update(id, request);
+    }
+
+    @PutMapping("/return")
+    public UpdateRentalResponse returnCarFromRental(@RequestParam(name="car-id", required = true) int carId) throws Exception{
+        return service.returnCarFromRental(carId);
     }
 
     @DeleteMapping("/{id}")

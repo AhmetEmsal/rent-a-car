@@ -19,5 +19,5 @@ public interface RentalService {
 
     void delete(int id) throws Exception;
 
-    GetRentalResponse returnCarFromRental(int carId);
+    UpdateRentalResponse returnCarFromRental(int carId) throws Exception;
 }

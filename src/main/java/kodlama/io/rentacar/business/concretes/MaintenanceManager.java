@@ -131,8 +131,18 @@ public class MaintenanceManager implements MaintenanceService {
     }
 
     @Override
-    public GetMaintenanceResponse returnCarFromMaintenance(int carId) {
-        return null;
+    public UpdateMaintenanceResponse returnCarFromMaintenance(int carId) throws Exception {
+        throwErrorIfCarIsNotUnderMaintenance(carId);
+
+        Maintenance maintenance = repository.findByCarIdAndIsCompletedIsFalse(carId);
+        maintenance.setCompleted(true);
+        maintenance.setEndDate(LocalDateTime.now());
+
+        carService.changeState(carId, State.AVAILABLE);
+
+        Maintenance savedMaintenance = repository.save(maintenance);
+
+        return modelMapper.map(savedMaintenance, UpdateMaintenanceResponse.class);
     }
 
     private void throwErrorIfCarCannotSentToMaintenance(int carId) throws Exception {
@@ -141,6 +151,10 @@ public class MaintenanceManager implements MaintenanceService {
         boolean carCanBeSentToMaintenance = car.getState().equals(State.AVAILABLE);
         if(carCanBeSentToMaintenance) return;
         throw new IllegalStateException("Car cannot be sent to maintenance due to it's state: " + car.getState());
+    }
+
+    private void throwErrorIfCarIsNotUnderMaintenance(int carId) throws Exception{
+        if(repository.existsByCarIdAndIsCompletedIsFalse(carId)) return;
     }
 
 
