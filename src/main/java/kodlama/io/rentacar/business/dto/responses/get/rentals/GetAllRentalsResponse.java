@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.business.dto.responses.get;
+package kodlama.io.rentacar.business.dto.responses.get.rentals;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,10 +6,11 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class GetRentalResponse {
+public class GetAllRentalsResponse {
     private int id;
     private int carId;
     private double dailyPrice;

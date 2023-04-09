@@ -4,8 +4,8 @@ import kodlama.io.rentacar.business.abstracts.RentalService;
 import kodlama.io.rentacar.business.dto.requests.create.CreateRentalRequest;
 import kodlama.io.rentacar.business.dto.requests.update.UpdateRentalRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateRentalResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetAllRentalsResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetRentalResponse;
+import kodlama.io.rentacar.business.dto.responses.get.rentals.GetAllRentalsResponse;
+import kodlama.io.rentacar.business.dto.responses.get.rentals.GetRentalResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateRentalResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +39,7 @@ public class RentalsController {
     }
 
     @PutMapping("/return")
-    public UpdateRentalResponse returnCarFromRental(@RequestParam(name="car-id", required = true) int carId) throws Exception{
+    public UpdateRentalResponse returnCarFromRental(@RequestParam(name="car-id") int carId) throws Exception{
         return service.returnCarFromRental(carId);
     }
 

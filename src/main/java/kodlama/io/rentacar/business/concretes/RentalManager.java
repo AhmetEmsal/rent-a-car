@@ -1,14 +1,16 @@
 package kodlama.io.rentacar.business.concretes;
 
 import kodlama.io.rentacar.business.abstracts.CarService;
+import kodlama.io.rentacar.business.abstracts.PaymentService;
 import kodlama.io.rentacar.business.abstracts.RentalService;
 import kodlama.io.rentacar.business.dto.requests.create.CreateRentalRequest;
 import kodlama.io.rentacar.business.dto.requests.update.UpdateRentalRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateRentalResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetAllRentalsResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetCarResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetRentalResponse;
+import kodlama.io.rentacar.business.dto.responses.get.rentals.GetAllRentalsResponse;
+import kodlama.io.rentacar.business.dto.responses.get.cars.GetCarResponse;
+import kodlama.io.rentacar.business.dto.responses.get.rentals.GetRentalResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateRentalResponse;
+import kodlama.io.rentacar.common.dto.CreateRentalPaymentRequest;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.Rental;
 import kodlama.io.rentacar.entities.enums.State;
@@ -26,6 +28,7 @@ import java.util.Optional;
 public class RentalManager implements RentalService {
     private final RentalRepository repository;
     private final CarService carService;
+    private final PaymentService paymentService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -37,21 +40,30 @@ public class RentalManager implements RentalService {
         // check car state
         throwErrorIfCarCannotSentToRental(carId);
 
-        // update car state
-        carService.changeState(carId, State.RENTED);
-
         // map to rental
         Rental rental = modelMapper.map(request, Rental.class);
+
+        // calc total price
+        final double totalPrice = rental.getRentedForDays() * rental.getDailyPrice();
+
+        // payment
+        CreateRentalPaymentRequest paymentRequest = new CreateRentalPaymentRequest();
+        modelMapper.map(request.getPaymentRequest(), paymentRequest);
+        paymentRequest.setPrice(totalPrice);
+        paymentService.processRentalPayment(paymentRequest);
+
+        // update car state
+        carService.changeState(carId, State.RENTED);
 
         // create and save rental
         LocalDateTime now = LocalDateTime.now();
         rental.setId(0);
-        rental.setTotalPrice(rental.getRentedForDays() * rental.getDailyPrice());
+        rental.setTotalPrice(totalPrice);
         rental.setEndDate(rental.getStartDate().plusDays(rental.getRentedForDays()));
         rental.setUpdatedAt(null);
         rental.setCreatedAt(now);
-        Rental savedRental = repository.save(rental);
-        return modelMapper.map(savedRental, CreateRentalResponse.class);
+        Rental createdRental = repository.save(rental);
+        return modelMapper.map(createdRental, CreateRentalResponse.class);
     }
 
     @Override

@@ -1,6 +1,6 @@
-package kodlama.io.rentacar.configuration.mapper;
+package kodlama.io.rentacar.core.configuration.mapper;
 
-import kodlama.io.rentacar.configuration.converters.TimestampToLocalDateTimeConverter;
+import kodlama.io.rentacar.core.configuration.converters.TimestampToLocalDateTimeConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

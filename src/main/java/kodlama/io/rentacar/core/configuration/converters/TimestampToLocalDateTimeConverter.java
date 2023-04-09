@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.configuration.converters;
+package kodlama.io.rentacar.core.configuration.converters;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 

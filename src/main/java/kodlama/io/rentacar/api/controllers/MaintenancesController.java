@@ -4,8 +4,8 @@ import kodlama.io.rentacar.business.abstracts.MaintenanceService;
 import kodlama.io.rentacar.business.dto.requests.create.CreateMaintenanceRequest;
 import kodlama.io.rentacar.business.dto.requests.update.UpdateMaintenanceRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateMaintenanceResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetAllMaintenanceResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetMaintenanceResponse;
+import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetAllMaintenanceResponse;
+import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateMaintenanceResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,7 +36,7 @@ public class MaintenancesController {
     }
 
     @PutMapping("/return")
-    public UpdateMaintenanceResponse returnCarFromMaintenance(@RequestParam(name="car-id", required = true) int carId) throws Exception {
+    public UpdateMaintenanceResponse returnCarFromMaintenance(@RequestParam(name="car-id") int carId) throws Exception {
         return service.returnCarFromMaintenance(carId);
     }
 
