@@ -24,7 +24,9 @@ public class Car {
     private double dailyPrice;
     @Enumerated(EnumType.STRING)
     private State state;
+
     @ManyToOne
+    @JoinColumn(name = "model_id")
     private Model model;
 
     @OneToMany(mappedBy = "car")

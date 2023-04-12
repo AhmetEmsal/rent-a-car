@@ -7,6 +7,8 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateBrandResponse;
 import kodlama.io.rentacar.business.dto.responses.get.brands.GetAllBrandsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.brands.GetBrandResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateBrandResponse;
+import kodlama.io.rentacar.business.rules.BrandBusinessRules;
+import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
 import kodlama.io.rentacar.entities.Brand;
 import kodlama.io.rentacar.repository.BrandRepository;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.Optional;
 public class BrandManager implements BrandService {
     private final BrandRepository repository;
     private final ModelMapper modelMapper;
+    private final BrandBusinessRules businessRules;
 
     @Override
     public List<GetAllBrandsResponse> getAll() {
@@ -39,8 +42,8 @@ public class BrandManager implements BrandService {
     }
 
     @Override
-    public UpdateBrandResponse update(int id, UpdateBrandRequest request) throws Exception {
-        throwErrorIfBrandNotExist(id);
+    public UpdateBrandResponse update(int id, UpdateBrandRequest request) throws BusinessException {
+        businessRules.checkIfEntityExistsById(id);
         Brand brand = modelMapper.map(request,Brand.class);
         brand.setId(id);
         repository.save(brand);
@@ -56,16 +59,11 @@ public class BrandManager implements BrandService {
     }
 
     @Override
-    public void delete(int id) throws Exception{
-        throwErrorIfBrandNotExist(id);
+    public void delete(int id) throws BusinessException{
+        businessRules.checkIfEntityExistsById(id);
         repository.deleteById(id);
     }
 
-
-    private void throwErrorIfBrandNotExist(int id){
-        if(repository.existsById(id)) return;
-        throwErrorAboutBrandNotExist(id);
-    }
 
     private void throwErrorAboutBrandNotExist(int id){
         throw new RuntimeException("Brand("+id+") not found!");

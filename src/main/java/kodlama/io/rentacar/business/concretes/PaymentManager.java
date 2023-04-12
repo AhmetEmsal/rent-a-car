@@ -59,11 +59,11 @@ public class PaymentManager implements PaymentService {
         // map from request to payment and set id
         Payment payment = modelMapper.map(request, Payment.class);
 
-        // If the card number is to be updated, it is necessary to check whether the card number is used
-        final boolean cardNumberIsNotEqual = !oldPayment.getCardNumber().equals(payment.getCardNumber());
-        if(cardNumberIsNotEqual){
-            Optional<Payment> check = repository.findByCardNumber(payment.getCardNumber());
-            if(check.isEmpty())
+        //
+        final boolean cardNumberWantToBeChanged = !oldPayment.getCardNumber().equals(payment.getCardNumber());
+        if(cardNumberWantToBeChanged){
+            boolean existingPaymentWithTheCardNumber = repository.findByCardNumber(payment.getCardNumber()).isPresent();
+            if(existingPaymentWithTheCardNumber)
                 throw new RuntimeException("Card number("+payment.getCardNumber()+") is already used!");
         }
 

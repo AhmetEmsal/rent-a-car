@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.core.configuration.mapper;
+package kodlama.io.rentacar.core.utilities.mapper;
 
 import kodlama.io.rentacar.core.configuration.converters.TimestampToLocalDateTimeConverter;
 import org.modelmapper.ModelMapper;

@@ -19,8 +19,11 @@ public class Model {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
+
     @ManyToOne
+    @JoinColumn(name = "brand_id")
     private Brand brand;
+
     @OneToMany(mappedBy = "model")
     private List<Car> cars;
 }

@@ -21,9 +21,11 @@ public class Maintenance {
     private int id;
     private String information;
     private boolean isCompleted;
+
     @ManyToOne
     @JoinColumn(name = "car_id")
     private Car car;
+
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     @Nullable
