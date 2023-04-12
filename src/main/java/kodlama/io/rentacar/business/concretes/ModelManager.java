@@ -7,6 +7,8 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateModelResponse;
 import kodlama.io.rentacar.business.dto.responses.get.models.GetAllModelsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.models.GetModelResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateModelResponse;
+import kodlama.io.rentacar.business.rules.ModelBusinessRules;
+import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
 import kodlama.io.rentacar.entities.Model;
 import kodlama.io.rentacar.repository.ModelRepository;
 import lombok.AllArgsConstructor;
@@ -14,13 +16,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class ModelManager implements ModelService {
     private final ModelRepository repository;
     private final ModelMapper modelMapper;
+    private final ModelBusinessRules businessRules;
 
     @Override
     public List<GetAllModelsResponse> getAll() {
@@ -39,8 +41,8 @@ public class ModelManager implements ModelService {
     }
 
     @Override
-    public UpdateModelResponse update(int id, UpdateModelRequest request) throws Exception {
-        throwErrorIfModelNotExist(id);
+    public UpdateModelResponse update(int id, UpdateModelRequest request) throws BusinessException {
+        businessRules.checkIfEntityExistsById(id);
         Model model = modelMapper.map(request, Model.class);
         model.setId(id);
         repository.save(model);
@@ -48,26 +50,14 @@ public class ModelManager implements ModelService {
     }
 
     @Override
-    public GetModelResponse getById(int id) throws Exception {
-        Optional<Model> model = repository.findById(id);
-        if(model.isEmpty()) throwErrorAboutModelNotExist(id);
-
-        return modelMapper.map(model.get(), GetModelResponse.class);
+    public GetModelResponse getById(int id) throws BusinessException {
+        Model model = businessRules.checkIfEntityExistsByIdThenReturn(id);
+        return modelMapper.map(model, GetModelResponse.class);
     }
 
     @Override
-    public void delete(int id) throws Exception {
-        throwErrorIfModelNotExist(id);
+    public void delete(int id) throws BusinessException {
+        businessRules.checkIfEntityExistsById(id);
         repository.deleteById(id);
-    }
-
-    private void throwErrorIfModelNotExist(int id){
-        if(repository.existsById(id)) return;
-        throwErrorAboutModelNotExist(id);
-    }
-
-    private void throwErrorAboutModelNotExist(int id){
-        throw new RuntimeException("Model("+id+") not found!");
-
     }
 }

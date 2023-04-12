@@ -6,9 +6,10 @@ import kodlama.io.rentacar.business.dto.requests.create.CreateMaintenanceRequest
 import kodlama.io.rentacar.business.dto.requests.update.UpdateMaintenanceRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetAllMaintenanceResponse;
-import kodlama.io.rentacar.business.dto.responses.get.cars.GetCarResponse;
 import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateMaintenanceResponse;
+import kodlama.io.rentacar.business.rules.MaintenanceBusinessRules;
+import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.Maintenance;
 import kodlama.io.rentacar.entities.enums.State;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +27,7 @@ public class MaintenanceManager implements MaintenanceService {
     private final MaintenanceRepository repository;
     private final CarService carService;
     private final ModelMapper modelMapper;
+    private final MaintenanceBusinessRules businessRules;
 
     @Override
     public List<GetAllMaintenanceResponse> getAll() {
@@ -37,16 +38,21 @@ public class MaintenanceManager implements MaintenanceService {
     }
 
     @Override
-    public CreateMaintenanceResponse add(CreateMaintenanceRequest request) throws Exception {
+    public CreateMaintenanceResponse add(CreateMaintenanceRequest request) throws BusinessException {
 
-        // get car id
-        int carId = request.getCarId();
+        // get car
+        Car car;
+        {
+            int carId = request.getCarId();
+            var carResponse = carService.getById(carId);
+            car = modelMapper.map(carResponse, Car.class);
+        }
 
         // check car state
-        throwErrorIfCarCannotSentToMaintenance(carId);
+        businessRules.checkIfCarCannotSendToMaintenance(car);
 
         // update car state
-        carService.changeState(carId, State.MAINTENANCE);
+        carService.changeState(car.getId(), State.MAINTENANCE);
 
 
         // map to maintenance
@@ -65,7 +71,7 @@ public class MaintenanceManager implements MaintenanceService {
     }
 
     @Override
-    public UpdateMaintenanceResponse update(int id, UpdateMaintenanceRequest request) throws Exception {
+    public UpdateMaintenanceResponse update(int id, UpdateMaintenanceRequest request) throws BusinessException {
         // map to maintenance
         Maintenance maintenance = modelMapper.map(request, Maintenance.class);
 
@@ -77,11 +83,18 @@ public class MaintenanceManager implements MaintenanceService {
 
         // check if car id change
         if(oldCarId != newCarId){
-            throwErrorIfCarCannotSentToMaintenance(newCarId);
+
+            // get new car
+            Car newCar;
+            {
+                var carResponse = carService.getById(newCarId);
+                newCar = modelMapper.map(carResponse, Car.class);
+            }
+
+            // check new car state
+            businessRules.checkIfCarCannotSendToMaintenance(newCar);
 
             // update new car state
-            GetCarResponse carResponse = carService.getById(newCarId);
-            Car newCar =  modelMapper.map(carResponse, Car.class);
             State newCarOldState = newCar.getState();
             carService.changeState(newCarId, State.MAINTENANCE);
 
@@ -89,10 +102,10 @@ public class MaintenanceManager implements MaintenanceService {
             try {
                 carService.changeState(oldCarId,State.AVAILABLE);
             }
-            catch (Exception exception){
+            catch (BusinessException BusinessException){
                 // transaction back
                 carService.changeState(newCarId, newCarOldState);
-                throw exception;
+                throw BusinessException;
             }
 
             maintenance.setCar(newCar);
@@ -110,19 +123,14 @@ public class MaintenanceManager implements MaintenanceService {
     }
 
     @Override
-    public GetMaintenanceResponse getById(int id) throws Exception{
-        Optional<Maintenance> maintenance = repository.findById(id);
-        if(maintenance.isEmpty()) throwErrorAboutMaintenanceNotExist(id);
-
-        return modelMapper.map(maintenance.get(), GetMaintenanceResponse.class);
+    public GetMaintenanceResponse getById(int id) throws BusinessException{
+        Maintenance maintenance = businessRules.checkIfEntityExistsByIdThenReturn(id);
+        return modelMapper.map(maintenance, GetMaintenanceResponse.class);
     }
 
     @Override
-    public void delete(int id) throws Exception {
-        Optional<Maintenance> maintenanceOptional = repository.findById(id);
-        if(maintenanceOptional.isEmpty()) throwErrorAboutMaintenanceNotExist(id);
-
-        Maintenance maintenance = maintenanceOptional.get();
+    public void delete(int id) throws BusinessException {
+        Maintenance maintenance = businessRules.checkIfEntityExistsByIdThenReturn(id);
 
         // update car state
         carService.changeState(maintenance.getCar().getId(), State.AVAILABLE);
@@ -131,8 +139,8 @@ public class MaintenanceManager implements MaintenanceService {
     }
 
     @Override
-    public UpdateMaintenanceResponse returnCarFromMaintenance(int carId) throws Exception {
-        throwErrorIfCarIsNotUnderMaintenance(carId);
+    public UpdateMaintenanceResponse returnCarFromMaintenance(int carId) throws BusinessException {
+        businessRules.checkIfCarIsNotUnderMaintenance(carId);
 
         Maintenance maintenance = repository.findByCarIdAndIsCompletedIsFalse(carId);
         maintenance.setCompleted(true);
@@ -141,25 +149,7 @@ public class MaintenanceManager implements MaintenanceService {
         carService.changeState(carId, State.AVAILABLE);
 
         Maintenance savedMaintenance = repository.save(maintenance);
-
         return modelMapper.map(savedMaintenance, UpdateMaintenanceResponse.class);
-    }
-
-    private void throwErrorIfCarCannotSentToMaintenance(int carId) throws Exception {
-        var carResponse = carService.getById(carId);
-        var car = modelMapper.map(carResponse, Car.class);
-        boolean carCanBeSentToMaintenance = car.getState().equals(State.AVAILABLE);
-        if(carCanBeSentToMaintenance) return;
-        throw new IllegalStateException("Car cannot be sent to maintenance due to it's state: " + car.getState());
-    }
-
-    private void throwErrorIfCarIsNotUnderMaintenance(int carId) throws Exception{
-        if(repository.existsByCarIdAndIsCompletedIsFalse(carId)) return;
-    }
-
-
-    private void throwErrorAboutMaintenanceNotExist(int id){
-        throw new RuntimeException("Maintenance("+id+") not found!");
     }
 
 }

@@ -6,11 +6,13 @@ import kodlama.io.rentacar.business.abstracts.RentalService;
 import kodlama.io.rentacar.business.dto.requests.create.CreateRentalRequest;
 import kodlama.io.rentacar.business.dto.requests.update.UpdateRentalRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateRentalResponse;
-import kodlama.io.rentacar.business.dto.responses.get.rentals.GetAllRentalsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.cars.GetCarResponse;
+import kodlama.io.rentacar.business.dto.responses.get.rentals.GetAllRentalsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.rentals.GetRentalResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateRentalResponse;
+import kodlama.io.rentacar.business.rules.RentalBusinessRules;
 import kodlama.io.rentacar.common.dto.CreateRentalPaymentRequest;
+import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.Rental;
 import kodlama.io.rentacar.entities.enums.State;
@@ -21,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -30,15 +31,20 @@ public class RentalManager implements RentalService {
     private final CarService carService;
     private final PaymentService paymentService;
     private final ModelMapper modelMapper;
+    private final RentalBusinessRules businessRules;
 
     @Override
     public CreateRentalResponse add(CreateRentalRequest request) throws Exception {
 
-        // get car id
-        final int carId = request.getCarId();
+        // get car by car id
+        final Car car;
+        {
+            var carResponse = carService.getById(request.getCarId());
+            car = modelMapper.map(carResponse, Car.class);
+        }
 
         // check car state
-        throwErrorIfCarCannotSentToRental(carId);
+        businessRules.checkIfCarCannotSendToRental(car);
 
         // map to rental
         Rental rental = modelMapper.map(request, Rental.class);
@@ -53,7 +59,7 @@ public class RentalManager implements RentalService {
         paymentService.processRentalPayment(paymentRequest);
 
         // update car state
-        carService.changeState(carId, State.RENTED);
+        carService.changeState(car.getId(), State.RENTED);
 
         // create and save rental
         LocalDateTime now = LocalDateTime.now();
@@ -76,15 +82,13 @@ public class RentalManager implements RentalService {
     }
 
     @Override
-    public GetRentalResponse getById(int id) throws Exception {
-        Optional<Rental> rentalOptional = repository.findById(id);
-        if(rentalOptional.isEmpty()) throwErrorAboutRentalNotExist(id);
-
-        return modelMapper.map(rentalOptional.get(), GetRentalResponse.class);
+    public GetRentalResponse getById(int id) throws BusinessException {
+        Rental rental = businessRules.checkIfEntityExistsByIdThenReturn(id);
+        return modelMapper.map(rental, GetRentalResponse.class);
     }
 
     @Override
-    public UpdateRentalResponse update(int id, UpdateRentalRequest request) throws Exception {
+    public UpdateRentalResponse update(int id, UpdateRentalRequest request) throws BusinessException {
         // map to rental
         Rental rental = modelMapper.map(request, Rental.class);
 
@@ -95,11 +99,18 @@ public class RentalManager implements RentalService {
 
         // check if car id change
         if(oldCarId != newCarId){
-            throwErrorIfCarCannotSentToRental(newCarId);
+
+            // get new car by car id
+            Car newCar;
+            {
+                GetCarResponse carResponse = carService.getById(newCarId);
+                newCar =  modelMapper.map(carResponse, Car.class);
+            }
+
+            // check state of the new car
+            businessRules.checkIfCarCannotSendToRental(newCar);
 
             // update new car state
-            GetCarResponse carResponse = carService.getById(newCarId);
-            Car newCar =  modelMapper.map(carResponse, Car.class);
             State newCarOldState = newCar.getState();
             carService.changeState(newCarId, State.RENTED);
 
@@ -107,10 +118,10 @@ public class RentalManager implements RentalService {
             try {
                 carService.changeState(oldCarId,State.AVAILABLE);
             }
-            catch (Exception exception){
+            catch (BusinessException BusinessException){
                 // transaction back
                 carService.changeState(newCarId, newCarOldState);
-                throw exception;
+                throw BusinessException;
             }
 
             rental.setCar(newCar);
@@ -130,11 +141,8 @@ public class RentalManager implements RentalService {
     }
 
     @Override
-    public void delete(int id) throws Exception {
-        Optional<Rental> rentalOptional = repository.findById(id);
-        if(rentalOptional.isEmpty()) throwErrorAboutRentalNotExist(id);
-
-        Rental rental = rentalOptional.get();
+    public void delete(int id) throws BusinessException {
+        Rental rental = businessRules.checkIfEntityExistsByIdThenReturn(id);
 
         // update car state
         carService.changeState(rental.getCar().getId(), State.AVAILABLE);
@@ -143,8 +151,8 @@ public class RentalManager implements RentalService {
     }
 
     @Override
-    public UpdateRentalResponse returnCarFromRental(int carId) throws Exception {
-        throwErrorIfCarIsNotRented(carId);
+    public UpdateRentalResponse returnCarFromRental(int carId) throws BusinessException {
+        businessRules.checkIfCarIsNotUnderRental(carId);
 
         Rental rental = repository.findRentalByCarIdAndRentedIsContinue(carId);
         //rental.setCompleted(true);
@@ -156,22 +164,4 @@ public class RentalManager implements RentalService {
         return modelMapper.map(savedRental, UpdateRentalResponse.class);
     }
 
-    private void throwErrorIfCarIsNotRented(int carId) {
-        if(repository.existsByCarIdAndRentalIsContinue(carId)) return;
-        throw new RuntimeException("No car("+carId+") is rented found !");
-    }
-
-
-    private  void throwErrorIfCarCannotSentToRental(int carId) throws Exception{
-        var carResponse = carService.getById(carId);
-        var car = modelMapper.map(carResponse, Car.class);
-
-        boolean carCanBeSentToRental = car.getState().equals(State.AVAILABLE);
-        if(carCanBeSentToRental) return;
-        throw new IllegalStateException("Car cannot be sent to rental due to it's state: " + car.getState());
-    }
-
-    private void throwErrorAboutRentalNotExist(int id){
-        throw new RuntimeException("Rental("+id+") not exist");
-    }
 }

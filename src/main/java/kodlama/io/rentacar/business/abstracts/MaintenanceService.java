@@ -6,6 +6,7 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateMaintenanceRespon
 import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetAllMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateMaintenanceResponse;
+import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
 
 import java.util.List;
 
@@ -13,13 +14,13 @@ public interface MaintenanceService {
 
     List<GetAllMaintenanceResponse> getAll();
 
-    CreateMaintenanceResponse add(CreateMaintenanceRequest request) throws Exception;
+    CreateMaintenanceResponse add(CreateMaintenanceRequest request) throws BusinessException;
 
-    UpdateMaintenanceResponse update(int id, UpdateMaintenanceRequest request) throws Exception;
+    UpdateMaintenanceResponse update(int id, UpdateMaintenanceRequest request) throws BusinessException;
 
-    GetMaintenanceResponse getById(int id) throws Exception;
+    GetMaintenanceResponse getById(int id) throws BusinessException;
 
-    void delete(int id) throws Exception;
+    void delete(int id) throws BusinessException;
 
-    UpdateMaintenanceResponse returnCarFromMaintenance(int carId) throws Exception;
+    UpdateMaintenanceResponse returnCarFromMaintenance(int carId) throws BusinessException;
 }

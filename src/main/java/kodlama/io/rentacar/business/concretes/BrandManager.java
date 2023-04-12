@@ -16,7 +16,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -51,22 +50,14 @@ public class BrandManager implements BrandService {
     }
 
     @Override
-    public GetBrandResponse getById(int id) throws Exception {
-        Optional<Brand> brand = repository.findById(id);
-        if(brand.isEmpty()) throwErrorAboutBrandNotExist(id);
-
-        return modelMapper.map(brand.get(), GetBrandResponse.class);
+    public GetBrandResponse getById(int id) throws BusinessException {
+        Brand brand = businessRules.checkIfEntityExistsByIdThenReturn(id);
+        return modelMapper.map(brand, GetBrandResponse.class);
     }
 
     @Override
     public void delete(int id) throws BusinessException{
         businessRules.checkIfEntityExistsById(id);
         repository.deleteById(id);
-    }
-
-
-    private void throwErrorAboutBrandNotExist(int id){
-        throw new RuntimeException("Brand("+id+") not found!");
-
     }
 }

@@ -8,6 +8,8 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateCarResponse;
 import kodlama.io.rentacar.business.dto.responses.get.cars.GetAllCarsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.cars.GetCarResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateCarResponse;
+import kodlama.io.rentacar.business.rules.CarBusinessRules;
+import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.enums.State;
 import kodlama.io.rentacar.repository.CarRepository;
@@ -16,13 +18,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class CarManager implements CarService {
     private final CarRepository repository;
     private final ModelMapper modelMapper;
+    private final CarBusinessRules businessRules;
 
     @Override
     public List<GetAllCarsResponse> getAll(GetAllCarsRequest request) {
@@ -45,8 +47,8 @@ public class CarManager implements CarService {
     }
 
     @Override
-    public UpdateCarResponse update(int id, UpdateCarRequest request) throws Exception{
-        throwErrorIfCarNotExist(id);
+    public UpdateCarResponse update(int id, UpdateCarRequest request) throws BusinessException{
+        businessRules.checkIfEntityExistsById(id);
         Car car = modelMapper.map(request, Car.class);
         car.setId(id);
         Car updatedCar = repository.save(car);
@@ -54,38 +56,21 @@ public class CarManager implements CarService {
     }
 
     @Override
-    public GetCarResponse getById(int id) throws Exception{
-        Optional<Car> car = repository.findById(id);
-        if(car.isEmpty()) throwErrorAboutCarNotExist(id);
-
-        return modelMapper.map(car.get(), GetCarResponse.class);
+    public GetCarResponse getById(int id) throws BusinessException{
+        Car car = businessRules.checkIfEntityExistsByIdThenReturn(id);
+        return modelMapper.map(car, GetCarResponse.class);
     }
 
     @Override
-    public void delete(int id) throws Exception{
-        throwErrorIfCarNotExist(id);
-
+    public void delete(int id) throws BusinessException {
+        businessRules.checkIfEntityExistsById(id);
         repository.deleteById(id);
     }
 
     @Override
-    public void changeState(int carId, State state) throws Exception {
-        Optional<Car> optionalCar = repository.findById(carId);
-        if(optionalCar.isEmpty()) throwErrorAboutCarNotExist(carId);
-
-        Car car = optionalCar.get();
+    public void changeState(int carId, State state) throws BusinessException {
+        Car car = businessRules.checkIfEntityExistsByIdThenReturn(carId);
         car.setState(state);
         repository.save(car);
-    }
-
-
-    private void throwErrorIfCarNotExist(int id){
-        if(repository.existsById(id)) return;
-        throwErrorAboutCarNotExist(id);
-    }
-
-    private void throwErrorAboutCarNotExist(int id){
-        throw new RuntimeException("Car("+id+") not found!");
-
     }
 }
