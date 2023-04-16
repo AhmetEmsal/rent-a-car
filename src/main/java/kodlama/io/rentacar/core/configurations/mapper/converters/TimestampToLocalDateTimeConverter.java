@@ -1,9 +1,11 @@
-package kodlama.io.rentacar.core.configuration.converters;
+package kodlama.io.rentacar.core.configurations.mapper.converters;
+
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
 public class TimestampToLocalDateTimeConverter implements Converter<Timestamp, LocalDateTime> {
     @Override
     public LocalDateTime convert(MappingContext<Timestamp, LocalDateTime> context) {

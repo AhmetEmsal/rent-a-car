@@ -7,6 +7,7 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateRentalResponse;
 import kodlama.io.rentacar.business.dto.responses.get.rentals.GetAllRentalsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.rentals.GetRentalResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateRentalResponse;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,32 +20,32 @@ public class RentalsController {
     private final RentalService service;
 
     @GetMapping
-    public List<GetAllRentalsResponse> getAll(){
+    public List<GetAllRentalsResponse> getAll() {
         return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public GetRentalResponse getById(@PathVariable int id) throws Exception {
+    public GetRentalResponse getById(@PathVariable int id) throws BusinessException {
         return service.getById(id);
     }
 
     @PostMapping
-    public CreateRentalResponse add(@RequestBody CreateRentalRequest request) throws Exception {
+    public CreateRentalResponse add(@RequestBody CreateRentalRequest request) throws BusinessException {
         return service.add(request);
     }
 
     @PutMapping("/{id}")
-    public UpdateRentalResponse update(@PathVariable int id, @RequestBody UpdateRentalRequest request) throws Exception{
+    public UpdateRentalResponse update(@PathVariable int id, @RequestBody UpdateRentalRequest request) throws BusinessException {
         return service.update(id, request);
     }
 
     @PutMapping("/return")
-    public UpdateRentalResponse returnCarFromRental(@RequestParam(name="car-id") int carId) throws Exception{
+    public UpdateRentalResponse returnCarFromRental(@RequestParam(name = "car-id") int carId) throws BusinessException {
         return service.returnCarFromRental(carId);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
+    public void delete(@PathVariable int id) throws BusinessException {
         service.delete(id);
     }
 }

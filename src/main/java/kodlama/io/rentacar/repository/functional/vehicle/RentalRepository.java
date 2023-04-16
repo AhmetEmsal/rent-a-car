@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.repository;
+package kodlama.io.rentacar.repository.functional.vehicle;
 
 import kodlama.io.rentacar.entities.Rental;
 import org.springframework.data.jpa.repository.JpaRepository;

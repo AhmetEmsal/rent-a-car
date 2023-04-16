@@ -8,11 +8,13 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateBrandResponse;
 import kodlama.io.rentacar.business.dto.responses.get.brands.GetAllBrandsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.brands.GetBrandResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateBrandResponse;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/brands")
@@ -25,7 +27,7 @@ public class BrandsController {
     }
 
     @GetMapping("/{id}")
-    public GetBrandResponse getById(@PathVariable int id) throws Exception {
+    public GetBrandResponse getById(@PathVariable int id) throws BusinessException {
         return service.getById(id);
     }
 
@@ -36,13 +38,13 @@ public class BrandsController {
     }
 
     @PutMapping("/{id}")
-    public UpdateBrandResponse update(@PathVariable int id, @RequestBody UpdateBrandRequest request) throws Exception {
+    public UpdateBrandResponse update(@PathVariable int id, @RequestBody UpdateBrandRequest request) throws BusinessException {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable int id) throws Exception {
+    public void delete(@PathVariable int id) throws BusinessException {
         service.delete(id);
     }
 }

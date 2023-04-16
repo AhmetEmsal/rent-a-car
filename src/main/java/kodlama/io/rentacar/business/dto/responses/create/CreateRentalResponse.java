@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 public class CreateRentalResponse {
+    private final double totalPrice;
     private int id;
     private int carId;
     private double dailyPrice;
     private int rentedForDays;
-    private final double totalPrice;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private LocalDateTime updatedAt;

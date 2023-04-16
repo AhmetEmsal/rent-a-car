@@ -8,9 +8,9 @@ import kodlama.io.rentacar.business.dto.responses.get.brands.GetAllBrandsRespons
 import kodlama.io.rentacar.business.dto.responses.get.brands.GetBrandResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateBrandResponse;
 import kodlama.io.rentacar.business.rules.BrandBusinessRules;
-import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import kodlama.io.rentacar.entities.Brand;
-import kodlama.io.rentacar.repository.BrandRepository;
+import kodlama.io.rentacar.repository.bases.vehicle.BrandRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -43,10 +43,10 @@ public class BrandManager implements BrandService {
     @Override
     public UpdateBrandResponse update(int id, UpdateBrandRequest request) throws BusinessException {
         businessRules.checkIfEntityExistsById(id);
-        Brand brand = modelMapper.map(request,Brand.class);
+        Brand brand = modelMapper.map(request, Brand.class);
         brand.setId(id);
         repository.save(brand);
-        return modelMapper.map(brand,UpdateBrandResponse.class);
+        return modelMapper.map(brand, UpdateBrandResponse.class);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class BrandManager implements BrandService {
     }
 
     @Override
-    public void delete(int id) throws BusinessException{
+    public void delete(int id) throws BusinessException {
         businessRules.checkIfEntityExistsById(id);
         repository.deleteById(id);
     }

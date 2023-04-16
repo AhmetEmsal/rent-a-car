@@ -8,15 +8,16 @@ import kodlama.io.rentacar.business.dto.responses.create.CreatePaymentResponse;
 import kodlama.io.rentacar.business.dto.responses.get.payments.GetAllPaymentsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.payments.GetPaymentResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdatePaymentResponse;
+import kodlama.io.rentacar.business.rules.PaymentBusinessRules;
 import kodlama.io.rentacar.common.dto.CreateRentalPaymentRequest;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import kodlama.io.rentacar.entities.Payment;
-import kodlama.io.rentacar.repository.PaymentRepository;
+import kodlama.io.rentacar.repository.functional.PaymentRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -24,24 +25,25 @@ public class PaymentManager implements PaymentService {
     private final PaymentRepository repository;
     private final ModelMapper modelMapper;
     private final PosService posService;
+    private final PaymentBusinessRules businessRules;
+
     @Override
     public List<GetAllPaymentsResponse> getAll() {
         return repository.findAll()
                 .stream()
-                .map(payment-> modelMapper.map(payment, GetAllPaymentsResponse.class))
+                .map(payment -> modelMapper.map(payment, GetAllPaymentsResponse.class))
                 .toList();
     }
 
     @Override
-    public GetPaymentResponse getById(int id) throws Exception{
-        Optional<Payment> paymentOptional = repository.findById(id);
-        if(paymentOptional.isEmpty()) throwErrorAboutPaymentNotExist(id);
-        return modelMapper.map(paymentOptional.get(), GetPaymentResponse.class);
+    public GetPaymentResponse getById(int id) throws BusinessException {
+        Payment payment = businessRules.checkIfEntityExistsByIdThenReturn(id);
+        return modelMapper.map(payment, GetPaymentResponse.class);
     }
 
     @Override
-    public CreatePaymentResponse add(CreatePaymentRequest request) throws Exception{
-        throwErrorIfCardNumberIsUsed(request.getCardNumber());
+    public CreatePaymentResponse add(CreatePaymentRequest request) throws BusinessException {
+        businessRules.checkIfCardNumberIsNotUsed(request.getCardNumber());
 
         Payment payment = modelMapper.map(request, Payment.class);
         payment.setId(0);
@@ -50,71 +52,44 @@ public class PaymentManager implements PaymentService {
     }
 
     @Override
-    public UpdatePaymentResponse update(int id, UpdatePaymentRequest request) throws Exception {
+    public UpdatePaymentResponse update(int id, UpdatePaymentRequest request) throws BusinessException {
         // get payment before updating to check whether the card number is updated
-        Optional<Payment> oldPaymentOptional = repository.findById(id);
-        if(oldPaymentOptional.isEmpty()) throwErrorAboutPaymentNotExist(id);
-        Payment oldPayment = oldPaymentOptional.get();
+        Payment oldPayment = businessRules.checkIfEntityExistsByIdThenReturn(id);
 
         // map from request to payment and set id
         Payment payment = modelMapper.map(request, Payment.class);
 
         //
         final boolean cardNumberWantToBeChanged = !oldPayment.getCardNumber().equals(payment.getCardNumber());
-        if(cardNumberWantToBeChanged){
-            boolean existingPaymentWithTheCardNumber = repository.findByCardNumber(payment.getCardNumber()).isPresent();
-            if(existingPaymentWithTheCardNumber)
-                throw new RuntimeException("Card number("+payment.getCardNumber()+") is already used!");
+        if (cardNumberWantToBeChanged) {
+            businessRules.checkIfCardNumberIsNotUsed(payment.getCardNumber());
         }
 
-        Payment updatedPayment = repository.save(payment);
         payment.setId(id);
+        Payment updatedPayment = repository.save(payment);
         return modelMapper.map(updatedPayment, UpdatePaymentResponse.class);
     }
 
     @Override
-    public void delete(int id) throws Exception {
-        throwErrorIfPaymentNotExist(id);
+    public void delete(int id) throws BusinessException {
+        businessRules.checkIfEntityExistsById(id);
         repository.deleteById(id);
     }
 
     @Override
-    public void processRentalPayment(CreateRentalPaymentRequest request) throws Exception {
-        throwErrorIfPaymentIsNotExists(request);
+    public void processRentalPayment(CreateRentalPaymentRequest request) throws BusinessException {
+        businessRules.checkIfPaymentIsExists(request);
 
         Payment payment = repository.findByCardNumber(request.getCardNumber()).get();
         double balance = payment.getBalance();
         final double price = request.getPrice();
-        throwErrorIfBalanceIsNotEnough(balance, price);
+        businessRules.checkIfBalanceIsEnough(balance, price);
+
         posService.pay();
+
         balance -= price;
         payment.setBalance(balance);
         repository.save(payment);
 
-    }
-
-
-    private void throwErrorIfCardNumberIsUsed(String cardNumber) throws Exception{
-        if(!repository.existsByCardNumber(cardNumber)) return;
-        throw new RuntimeException("Card number("+cardNumber+") is already used!");
-    }
-
-    private void throwErrorIfPaymentIsNotExists(CreateRentalPaymentRequest request) throws Exception{
-        if(repository.existsByCardNumberAndCardHolderAndCardExpirationYearAndCardExpirationMonthAndCardCvv(request)) return;
-        throw new RuntimeException("Card information is incorrect.");
-    }
-
-    private void throwErrorIfBalanceIsNotEnough(double balance, double price) throws Exception{
-        if(balance >= price) return;
-        throw new RuntimeException("The "+price+" units of money required for the rental could not be afford by the credit card balance!");
-    }
-
-    private void throwErrorIfPaymentNotExist(int id) throws Exception {
-        if(repository.existsById(id)) return;
-        throwErrorAboutPaymentNotExist(id);
-    }
-
-    private void throwErrorAboutPaymentNotExist(int id) throws Exception{
-        throw new Exception("Payment("+id+") not exist");
     }
 }

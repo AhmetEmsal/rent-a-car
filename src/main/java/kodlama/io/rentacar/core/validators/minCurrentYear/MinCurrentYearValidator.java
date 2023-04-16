@@ -7,7 +7,8 @@ import java.time.Year;
 
 public class MinCurrentYearValidator implements ConstraintValidator<MinCurrentYear, Integer> {
     @Override
-    public void initialize(MinCurrentYear minYear) {}
+    public void initialize(MinCurrentYear minYear) {
+    }
 
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext context) {

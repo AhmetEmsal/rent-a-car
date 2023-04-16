@@ -1,8 +1,10 @@
 package kodlama.io.rentacar.business.concretes;
 
 import kodlama.io.rentacar.business.abstracts.CarService;
+import kodlama.io.rentacar.business.abstracts.InvoiceService;
 import kodlama.io.rentacar.business.abstracts.PaymentService;
 import kodlama.io.rentacar.business.abstracts.RentalService;
+import kodlama.io.rentacar.business.dto.requests.create.CreateInvoicesRequest;
 import kodlama.io.rentacar.business.dto.requests.create.CreateRentalRequest;
 import kodlama.io.rentacar.business.dto.requests.update.UpdateRentalRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateRentalResponse;
@@ -12,11 +14,11 @@ import kodlama.io.rentacar.business.dto.responses.get.rentals.GetRentalResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateRentalResponse;
 import kodlama.io.rentacar.business.rules.RentalBusinessRules;
 import kodlama.io.rentacar.common.dto.CreateRentalPaymentRequest;
-import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.Rental;
 import kodlama.io.rentacar.entities.enums.State;
-import kodlama.io.rentacar.repository.RentalRepository;
+import kodlama.io.rentacar.repository.functional.vehicle.RentalRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -32,9 +34,10 @@ public class RentalManager implements RentalService {
     private final PaymentService paymentService;
     private final ModelMapper modelMapper;
     private final RentalBusinessRules businessRules;
+    private final InvoiceService invoiceService;
 
     @Override
-    public CreateRentalResponse add(CreateRentalRequest request) throws Exception {
+    public CreateRentalResponse add(CreateRentalRequest request) throws BusinessException {
 
         // get car by car id
         final Car car;
@@ -44,7 +47,7 @@ public class RentalManager implements RentalService {
         }
 
         // check car state
-        businessRules.checkIfCarCannotSendToRental(car);
+        businessRules.checkIfCarCanBeSentToRental(car.getState());
 
         // map to rental
         Rental rental = modelMapper.map(request, Rental.class);
@@ -69,6 +72,20 @@ public class RentalManager implements RentalService {
         rental.setUpdatedAt(null);
         rental.setCreatedAt(now);
         Rental createdRental = repository.save(rental);
+
+        invoiceService.add(new CreateInvoicesRequest(
+                createdRental.getId(),
+                "",// cardHolder: name surname
+                car.getModel().getName(),
+                car.getModel().getBrand().getName(),
+                car.getPlate(),
+                car.getModelYear(),
+                car.getDailyPrice(),
+                totalPrice,
+                rental.getRentedForDays(),
+                LocalDateTime.now()
+        ));
+
         return modelMapper.map(createdRental, CreateRentalResponse.class);
     }
 
@@ -77,7 +94,7 @@ public class RentalManager implements RentalService {
 
         return repository.findAll()
                 .stream()
-                .map(rental-> modelMapper.map(rental, GetAllRentalsResponse.class))
+                .map(rental -> modelMapper.map(rental, GetAllRentalsResponse.class))
                 .toList();
     }
 
@@ -98,17 +115,17 @@ public class RentalManager implements RentalService {
                 newCarId = request.getCarId();
 
         // check if car id change
-        if(oldCarId != newCarId){
+        if (oldCarId != newCarId) {
 
             // get new car by car id
             Car newCar;
             {
                 GetCarResponse carResponse = carService.getById(newCarId);
-                newCar =  modelMapper.map(carResponse, Car.class);
+                newCar = modelMapper.map(carResponse, Car.class);
             }
 
             // check state of the new car
-            businessRules.checkIfCarCannotSendToRental(newCar);
+            businessRules.checkIfCarCanBeSentToRental(newCar.getState());
 
             // update new car state
             State newCarOldState = newCar.getState();
@@ -116,9 +133,8 @@ public class RentalManager implements RentalService {
 
             // update old car state
             try {
-                carService.changeState(oldCarId,State.AVAILABLE);
-            }
-            catch (BusinessException BusinessException){
+                carService.changeState(oldCarId, State.AVAILABLE);
+            } catch (BusinessException BusinessException) {
                 // transaction back
                 carService.changeState(newCarId, newCarOldState);
                 throw BusinessException;
@@ -152,7 +168,7 @@ public class RentalManager implements RentalService {
 
     @Override
     public UpdateRentalResponse returnCarFromRental(int carId) throws BusinessException {
-        businessRules.checkIfCarIsNotUnderRental(carId);
+        businessRules.checkIfCarIsUnderRental(carId);
 
         Rental rental = repository.findRentalByCarIdAndRentedIsContinue(carId);
         //rental.setCompleted(true);

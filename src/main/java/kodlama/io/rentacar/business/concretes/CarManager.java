@@ -9,10 +9,10 @@ import kodlama.io.rentacar.business.dto.responses.get.cars.GetAllCarsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.cars.GetCarResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateCarResponse;
 import kodlama.io.rentacar.business.rules.CarBusinessRules;
-import kodlama.io.rentacar.core.utilities.exceptions.BusinessException;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.enums.State;
-import kodlama.io.rentacar.repository.CarRepository;
+import kodlama.io.rentacar.repository.bases.vehicle.CarRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class CarManager implements CarService {
     @Override
     public List<GetAllCarsResponse> getAll(GetAllCarsRequest request) {
         List<Car> cars;
-        if(request.isIncludeMaintenance()) cars = repository.findAll();
+        if (request.isIncludeMaintenance()) cars = repository.findAll();
         else cars = repository.findAllByStateIsNot(State.MAINTENANCE);
 
         return cars
@@ -47,7 +47,7 @@ public class CarManager implements CarService {
     }
 
     @Override
-    public UpdateCarResponse update(int id, UpdateCarRequest request) throws BusinessException{
+    public UpdateCarResponse update(int id, UpdateCarRequest request) throws BusinessException {
         businessRules.checkIfEntityExistsById(id);
         Car car = modelMapper.map(request, Car.class);
         car.setId(id);
@@ -56,7 +56,7 @@ public class CarManager implements CarService {
     }
 
     @Override
-    public GetCarResponse getById(int id) throws BusinessException{
+    public GetCarResponse getById(int id) throws BusinessException {
         Car car = businessRules.checkIfEntityExistsByIdThenReturn(id);
         return modelMapper.map(car, GetCarResponse.class);
     }

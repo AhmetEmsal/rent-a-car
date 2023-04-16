@@ -1,6 +1,8 @@
-package kodlama.io.rentacar.core.utilities.exceptions;
+package kodlama.io.rentacar.core.utilities.exceptions.business;
 
-public enum BusinessErrorCodes {
+import kodlama.io.rentacar.core.utilities.exceptions.ExceptionErrorCode;
+
+public enum BusinessErrorCode implements ExceptionErrorCode {
     NotExists(1),
     UnsuitableState(2),
     AlreadyUsed(3),
@@ -11,7 +13,7 @@ public enum BusinessErrorCodes {
 
     private final int errorCode;
 
-    BusinessErrorCodes(int errorCode){
+    BusinessErrorCode(int errorCode) {
         this.errorCode = errorCode;
     }
 

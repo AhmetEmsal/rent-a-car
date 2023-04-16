@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -27,6 +28,9 @@ public class Rental {
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
     @ManyToOne
-    @JoinColumn(name= "car_id")
+    @JoinColumn(name = "car_id")
     private Car car;
+
+    @OneToOne(mappedBy = "rental")
+    private Invoice invoice;
 }

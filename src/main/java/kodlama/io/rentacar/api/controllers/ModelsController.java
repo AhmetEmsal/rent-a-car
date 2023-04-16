@@ -7,6 +7,7 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateModelResponse;
 import kodlama.io.rentacar.business.dto.responses.get.models.GetAllModelsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.models.GetModelResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateModelResponse;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class ModelsController {
     }
 
     @GetMapping("/{id}")
-    public GetModelResponse getById(@PathVariable int id) throws Exception {
+    public GetModelResponse getById(@PathVariable int id) throws BusinessException {
         return service.getById(id);
     }
 
@@ -36,13 +37,13 @@ public class ModelsController {
     }
 
     @PutMapping("/{id}")
-    public UpdateModelResponse update(@PathVariable int id, @RequestBody UpdateModelRequest request) throws Exception {
+    public UpdateModelResponse update(@PathVariable int id, @RequestBody UpdateModelRequest request) throws BusinessException {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable int id) throws Exception {
+    public void delete(@PathVariable int id) throws BusinessException {
         service.delete(id);
     }
 }

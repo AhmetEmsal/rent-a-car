@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.core.utilities.exceptions;
+package kodlama.io.rentacar.core.utilities.exceptions.business;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,9 +10,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BusinessException extends RuntimeException {
-    private BusinessErrorCodes errorCode;
-    public BusinessException(BusinessErrorCodes errorCode, String text){
+    private BusinessErrorCode errorCode;
+
+    public BusinessException(BusinessErrorCode errorCode, String text) {
         super(text);
         this.errorCode = errorCode;
     }
+
 }

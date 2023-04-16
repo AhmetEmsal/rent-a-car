@@ -8,6 +8,7 @@ import kodlama.io.rentacar.business.dto.responses.create.CreatePaymentResponse;
 import kodlama.io.rentacar.business.dto.responses.get.payments.GetAllPaymentsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.payments.GetPaymentResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdatePaymentResponse;
+import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,27 +21,27 @@ public class PaymentsController {
     private final PaymentService service;
 
     @GetMapping
-    public List<GetAllPaymentsResponse> getAll(){
+    public List<GetAllPaymentsResponse> getAll() {
         return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public GetPaymentResponse getById(@PathVariable int id) throws Exception {
+    public GetPaymentResponse getById(@PathVariable int id) throws BusinessException {
         return service.getById(id);
     }
 
     @PostMapping
-    public CreatePaymentResponse add(@Valid @RequestBody CreatePaymentRequest request) throws Exception {
+    public CreatePaymentResponse add(@Valid @RequestBody CreatePaymentRequest request) throws BusinessException {
         return service.add(request);
     }
 
     @PutMapping("/{id}")
-    public UpdatePaymentResponse update(@PathVariable int id, @Valid @RequestBody UpdatePaymentRequest request) throws Exception {
+    public UpdatePaymentResponse update(@PathVariable int id, @Valid @RequestBody UpdatePaymentRequest request) throws BusinessException {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
+    public void delete(@PathVariable int id) throws BusinessException {
         service.delete(id);
     }
 }
