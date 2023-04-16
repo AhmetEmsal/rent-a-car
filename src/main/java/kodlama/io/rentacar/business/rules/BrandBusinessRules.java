@@ -18,8 +18,8 @@ public class BrandBusinessRules extends BaseBusinessRules<Brand, BrandRepository
         super(Messages.Brand.NotExists, repository);
     }
 
-    public void checkIfNameNotExists(String name) {
-        if (getRepository().existsByNameIgnoreCase(name)) return;
+    public void checkIfBrandNameNotExists(String name) {
+        if (!getRepository().existsByNameIgnoreCase(name)) return;
         throw new BusinessException(BusinessErrorCode.AlreadyUsed, Messages.Brand.Exists);
     }
 }

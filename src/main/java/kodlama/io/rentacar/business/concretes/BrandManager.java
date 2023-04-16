@@ -34,6 +34,7 @@ public class BrandManager implements BrandService {
 
     @Override
     public CreateBrandResponse add(CreateBrandRequest request) {
+        businessRules.checkIfBrandNameNotExists(request.getName());
         Brand brand = modelMapper.map(request, Brand.class);
         brand.setId(0);
         Brand createdBrand = repository.save(brand);
@@ -42,7 +43,12 @@ public class BrandManager implements BrandService {
 
     @Override
     public UpdateBrandResponse update(int id, UpdateBrandRequest request) throws BusinessException {
-        businessRules.checkIfEntityExistsById(id);
+        Brand oldBrand = businessRules.checkIfEntityExistsByIdThenReturn(id);
+
+        final boolean wantToChangeBrandName = !oldBrand.getName().equalsIgnoreCase(request.getName());
+        if (wantToChangeBrandName)
+            businessRules.checkIfBrandNameNotExists(request.getName());
+
         Brand brand = modelMapper.map(request, Brand.class);
         brand.setId(id);
         repository.save(brand);

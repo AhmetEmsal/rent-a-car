@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.core.validators.minCurrentDate;
+package kodlama.io.rentacar.core.validators.futureMonthAndYear;
 
 
 import jakarta.validation.ConstraintValidator;
@@ -9,12 +9,12 @@ import java.lang.reflect.Method;
 import java.time.MonthDay;
 import java.time.Year;
 
-public class MinCurrentDateValidator implements ConstraintValidator<MinCurrentDate, Object> {
+public class FutureMonthAndYearValidator implements ConstraintValidator<FutureMonthAndYear, Object> {
     private String yearFieldName;
     private String monthFieldName;
 
     @Override
-    public void initialize(MinCurrentDate annotation) {
+    public void initialize(FutureMonthAndYear annotation) {
         this.yearFieldName = annotation.yearFieldName();
         this.monthFieldName = annotation.monthFieldName();
     }

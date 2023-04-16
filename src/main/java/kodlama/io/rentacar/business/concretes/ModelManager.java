@@ -34,6 +34,7 @@ public class ModelManager implements ModelService {
 
     @Override
     public CreateModelResponse add(CreateModelRequest request) {
+        businessRules.checkIfBrandNameNotExist(request.getName());
         Model model = modelMapper.map(request, Model.class);
         model.setId(0);
         repository.save(model);
@@ -42,7 +43,12 @@ public class ModelManager implements ModelService {
 
     @Override
     public UpdateModelResponse update(int id, UpdateModelRequest request) throws BusinessException {
-        businessRules.checkIfEntityExistsById(id);
+        Model oldModel = businessRules.checkIfEntityExistsByIdThenReturn(id);
+
+        final boolean wantToChangeBrandName = !oldModel.getName().equalsIgnoreCase(request.getName());
+        if (wantToChangeBrandName)
+            businessRules.checkIfBrandNameNotExist(request.getName());
+
         Model model = modelMapper.map(request, Model.class);
         model.setId(id);
         repository.save(model);

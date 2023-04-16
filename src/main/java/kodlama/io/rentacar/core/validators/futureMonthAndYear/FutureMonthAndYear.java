@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.core.validators.minCurrentDate;
+package kodlama.io.rentacar.core.validators.futureMonthAndYear;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -12,9 +12,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ElementType.TYPE})
 @Retention(RUNTIME)
-@Constraint(validatedBy = MinCurrentDateValidator.class)
+@Constraint(validatedBy = FutureMonthAndYearValidator.class)
 @Documented
-public @interface MinCurrentDate {
+public @interface FutureMonthAndYear {
 
     String message() default "The date must be in the future. Check the month and year values.";
 

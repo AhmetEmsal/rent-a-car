@@ -2,10 +2,6 @@ package kodlama.io.rentacar.common.constants;
 
 public class Messages {
 
-    public static String notExists(String repositoryName, int id) {
-        return "No data exists in repository '" + repositoryName + "' with id " + id;
-    }
-
     public static class Car {
         public static final String NotExists = "CAR_NOT_EXISTS";
         public static final String Exists = "CAR_ALREADY_EXISTS";
