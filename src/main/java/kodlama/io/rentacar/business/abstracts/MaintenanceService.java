@@ -6,7 +6,7 @@ import kodlama.io.rentacar.business.dto.responses.create.CreateMaintenanceRespon
 import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetAllMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateMaintenanceResponse;
-import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
+import kodlama.io.rentacar.core.exceptions.business.BusinessException;
 
 import java.util.List;
 

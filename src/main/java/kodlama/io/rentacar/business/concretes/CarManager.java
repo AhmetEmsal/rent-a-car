@@ -9,7 +9,7 @@ import kodlama.io.rentacar.business.dto.responses.get.cars.GetAllCarsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.cars.GetCarResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateCarResponse;
 import kodlama.io.rentacar.business.rules.CarBusinessRules;
-import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
+import kodlama.io.rentacar.core.exceptions.business.BusinessException;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.enums.State;
 import kodlama.io.rentacar.repository.bases.vehicle.CarRepository;

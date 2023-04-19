@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.core.utilities.exceptions.business;
+package kodlama.io.rentacar.core.exceptions.business;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -2,8 +2,7 @@ package kodlama.io.rentacar.business.dto.requests;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import kodlama.io.rentacar.core.validators.futureMonthAndYear.FutureMonthAndYear;
+import kodlama.io.rentacar.core.annotations.futureMonthAndYear.FutureMonthAndYear;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +23,6 @@ public class PaymentRequest {
     @Length(min = 5)
     private String cardHolder;
 
-    @NotNull
     private int cardExpirationYear;
 
     @Max(value = 12)

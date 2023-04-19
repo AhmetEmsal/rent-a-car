@@ -8,7 +8,7 @@ import kodlama.io.rentacar.business.dto.responses.create.CreatePaymentResponse;
 import kodlama.io.rentacar.business.dto.responses.get.payments.GetAllPaymentsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.payments.GetPaymentResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdatePaymentResponse;
-import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
+import kodlama.io.rentacar.core.exceptions.business.BusinessException;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

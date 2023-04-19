@@ -8,7 +8,7 @@ import kodlama.io.rentacar.business.dto.responses.get.brands.GetAllBrandsRespons
 import kodlama.io.rentacar.business.dto.responses.get.brands.GetBrandResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateBrandResponse;
 import kodlama.io.rentacar.business.rules.BrandBusinessRules;
-import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
+import kodlama.io.rentacar.core.exceptions.business.BusinessException;
 import kodlama.io.rentacar.entities.Brand;
 import kodlama.io.rentacar.repository.bases.vehicle.BrandRepository;
 import lombok.AllArgsConstructor;

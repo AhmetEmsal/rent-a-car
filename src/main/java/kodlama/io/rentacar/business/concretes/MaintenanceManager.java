@@ -9,7 +9,7 @@ import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetAllMainten
 import kodlama.io.rentacar.business.dto.responses.get.maintenances.GetMaintenanceResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateMaintenanceResponse;
 import kodlama.io.rentacar.business.rules.MaintenanceBusinessRules;
-import kodlama.io.rentacar.core.utilities.exceptions.business.BusinessException;
+import kodlama.io.rentacar.core.exceptions.business.BusinessException;
 import kodlama.io.rentacar.entities.Car;
 import kodlama.io.rentacar.entities.Maintenance;
 import kodlama.io.rentacar.entities.enums.State;

@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.core.validators.minCurrentYear;
+package kodlama.io.rentacar.core.annotations.minCurrentYear;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
